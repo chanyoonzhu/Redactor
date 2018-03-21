@@ -3,7 +3,7 @@
 
 import argparse
 
-def main(files, flags, concepts, stats):
+def main(files, flags, concepts, output_dir, stats):
 
     # handle input files
     for f in files:
@@ -33,6 +33,10 @@ def main(files, flags, concepts, stats):
             # redact concept
             print(concept)
 
+    # handle output
+    # ***TODO*** output not dir
+    print(output_dir)
+
     # handle stats
     print(stats)
     
@@ -48,18 +52,13 @@ if __name__ == '__main__':
     parser.add_argument("--phones", action='store_true', help="redact phones")
     parser.add_argument("--concept", action='append',
                         help="The theme/keyword to redact")
+    parser.add_argument("--output", required=True, help="directory to store redacted files")
     parser.add_argument("--stats", type=argparse.FileType('w'), required=True,
                         help="file storing the summary of redaction process")
     args = parser.parse_args()
-    if not args.input and not args.stats:
+    if not args.input and not args.output and not args.stats:
         # missing argument error
         print("missing arguments, use --help for details")
-    elif not args.input:
-        # no file error
-        print("must provide files")
-    elif not args.stats:
-        # no file error
-        print("must use --stats to provide file name to store statistics")
     else:
         # handling arguments
         # input files
@@ -84,7 +83,9 @@ if __name__ == '__main__':
         concepts = []
         if args.concept:
             concepts = args.concept
+        # outputs
+        output_dir = args.output
         # stats
         stats_file = args.stats.name
         # call main
-        main(files, redaction_flags, concepts, stats_file)
+        main(files, redaction_flags, concepts, output_dir, stats_file)
