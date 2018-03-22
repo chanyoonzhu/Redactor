@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import argparse
 import nltk
 nltk.download('punkt')
@@ -9,21 +10,43 @@ nltk.download('averaged_perceptron_tagger')
 nltk.download('maxent_ne_chunker')
 nltk.download('words')
 
+def replace_char_with_block(str):
+    block_str = ""
+    for i in str:
+        if i not in [' ', '.', ',', '-', ';']:
+            block_str += u"\u2588"
+        else:
+            block_str += i
+    return block_str
+
+def redact_string_with_block(text, pattern):
+    redacted = text
+    match_idxes = [(m.start(), m.end()) for m in re.finditer(pattern, redacted)]
+    for idx_tuple in match_idxes:
+        begin_idx = idx_tuple[0]
+        end_idx = idx_tuple[1]
+        replacement = replace_char_with_block(redacted[begin_idx:end_idx+1])
+        redacted = redacted[:begin_idx] + replacement + text[end_idx+1:]
+    return redacted
+
 def redact_names (text):
-    text_str = text
     names = []
     # POS tag sentences
-    sentences = nltk.sent_tokenize(text_str)
+    sentences = nltk.sent_tokenize(text)
     sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
     sentences = [nltk.pos_tag(sentence) for sentence in sentences]
     # find out names and add to names list
     for sentence_tagged in sentences:
+        chunked = nltk.ne_chunk(sentence_tagged)
         for chunk in nltk.ne_chunk(sentence_tagged):
-            print(chunk)
             if type(chunk) == nltk.tree.Tree and chunk.label() == 'PERSON':
+                # populate lists with names
                 names.append(' '.join([word[0] for word in chunk]))
-    # replace names with character
-    # TODO
+    # create regular expressions 
+    my_regex = r"\b(" + re.escape("|".join([name.replace(" ", " ") for name in names])) + r")\b"
+    print(my_regex)
+    # replace strings matching regex
+    text_str = redact_string_with_block(text, my_regex)
     return text_str
 
 def redact_genders (text):
@@ -51,6 +74,7 @@ def redact(text, flags, concepts):
     if "names" in flags:
         # redact names
         content = redact_names(content)
+        print(content)
     if "genders" in flags:
         # redact genders
         content = redact_genders(content)
