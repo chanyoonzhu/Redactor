@@ -5,43 +5,71 @@ import os
 import argparse
 import nltk
 
-def main(files, flags, concepts, output_dir, stats):
+def redact_names (text):
+    text_str = text
+    return text_str
 
+def redact_genders (text):
+    text_str = text
+    return text_str
+
+def redact_dates (text):
+    text_str = text
+    return text_str
+
+def redact_addresses (text):
+    text_str = text
+    return text_str
+
+def redact_phones (text):
+    text_str = text
+    return text_str
+
+def redact_concept(text, concept):
+    text_str = text
+    return text_str
+
+def redact(text, flags, concepts):
+    content = text
+    if "names" in flags:
+        # redact names
+        content = redact_names(content)
+    if "genders" in flags:
+        # redact genders
+        content = redact_genders(content)
+    if "dates" in flags:
+        # redact dates
+        content = redact_dates(content)
+    if "addresses" in flags:
+        # redact addresses
+        content = redact_addresses(content)
+    if "phones" in flags:
+        # redact phones
+        content = redact_phones(content)
+    # redact themes specified in concepts
+    if len(concepts) > 0:
+        for concept in concepts:
+            # redact concept
+            redact_concept(content, concept)
+    # return redacted string
+    return content
+
+def main(files, flags, concepts, output_dir, stats):
     # handle input files
     for file in files:
         # check if file exists
         with open(file, 'r') as f:
+            # store file content in string
             raw_content = f.read()
-
             # redact items specified in flags
-        if "names" in flags:
-            # redact names
-            print("redact names")
-        if "genders" in flags:
-            # redact genders
-            print("redact genders")
-        if "dates" in flags:
-            # redact dates
-            print("redact dates")
-        if "addresses" in flags:
-            # redact addresses
-            print("redact addresses")
-        if "phones" in flags:
-            # redact phones
-            print("redact phones")
-        
-        # redact themes specified in concepts
-        if len(concepts) > 0:
-            for concept in concepts:
-                # redact concept
-                print(concept)
+            redact(raw_content, flags, concepts)
 
-        # handle output
-        # ***TODO*** output not dir
-        print(output_dir)
+            # handle output
+            # ***TODO*** output not dir
+            print(output_dir)
 
-        # handle stats
-        print(stats)
+            # handle stats
+            print(stats)
     
 
 ### parse args ###
