@@ -4,9 +4,26 @@
 import os
 import argparse
 import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('maxent_ne_chunker')
+nltk.download('words')
 
 def redact_names (text):
     text_str = text
+    names = []
+    # POS tag sentences
+    sentences = nltk.sent_tokenize(text_str)
+    sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+    sentences = [nltk.pos_tag(sentence) for sentence in sentences]
+    # find out names and add to names list
+    for sentence_tagged in sentences:
+        for chunk in nltk.ne_chunk(sentence_tagged):
+            print(chunk)
+            if type(chunk) == nltk.tree.Tree and chunk.label() == 'PERSON':
+                names.append(' '.join([word[0] for word in chunk]))
+    # replace names with character
+    # TODO
     return text_str
 
 def redact_genders (text):
